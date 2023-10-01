@@ -55,3 +55,37 @@ st.write("Network Graph of Src IP and Dst IP")
 fig = plt.figure(figsize=(20,20))
 nx.draw(G, with_labels=True)
 st.pyplot(fig)
+
+
+#make a bar chart of the protocols
+st.write("Protocols Used")
+st.bar_chart(df['Protocol'].value_counts())
+
+#side by side bar chart of ports used
+col1, col2 = st.columns(2)
+col1.write("Source Ports Used")
+col1.bar_chart(df['Src Port'].value_counts())
+
+col2.write("Destination Ports Used")
+col2.bar_chart(df['Dst Port'].value_counts())
+
+#plot histogram of  'Fwd Pkt Len Mean' and 'Bwd Pkt Len Mean'
+col1, col2 = st.columns(2)
+col1.write("Histogram of forward packet length mean")
+col1.bar_chart(df['Fwd Blk Rate Avg'])
+
+col2.write("Histogram of backward packet length mean")
+col2.bar_chart(df['Bwd Blk Rate Avg'])
+
+
+
+
+#correration matrix remove all non numeric columns
+df_corr = df.select_dtypes(include=[float, int])
+corr_matrix = df_corr.corr()
+st.write("Correlation Matrix")
+plt.figure(figsize=(20,20))
+haetmap_corr = sns.heatmap(corr_matrix, annot=True)
+st.pyplot(haetmap_corr.figure)
+
+
