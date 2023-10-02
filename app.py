@@ -6,8 +6,11 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
-#df = pd.read_csv('data/final_dataset.csv')
-df = pd.read_csv('data/minidata.csv')
+
+
+
+df = pd.read_csv('data/final_dataset.csv')
+#df = pd.read_csv('data/minidata.csv')
 
 st.write("""
 # DDoS Attack Data
