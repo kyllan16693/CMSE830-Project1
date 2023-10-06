@@ -5,18 +5,40 @@ import altair as alt
 import matplotlib.pyplot as plt
 import networkx as nx
 
-
-
-
-
-df = pd.read_csv('data/final_dataset.csv')
+#df = pd.read_csv('data/final_dataset.csv')
 #df = pd.read_csv('data/minidata.csv')
 
 st.write("""
 # DDoS Attack Data
 
-This app visualizes the DDoS Attack Data
+This app visualizes attack anomolies on a network.
 """)
+
+option = st.selectbox(
+        'Which dataset would you like to use?',
+        ('10k', '100k', '1m', '5m', 'full'))
+
+@st.cache_data
+def load_data(option):
+    #choose option size of dataset defuatl 10k
+    
+
+    #load in the data
+    if option == '10k':
+        df = pd.read_csv('data/10kdata.csv')
+    elif option == '100k':
+        df = pd.read_csv('data/100kdata.csv')
+    elif option == '1m':
+        df = pd.read_csv('data/1mdata.csv')
+    elif option == '5m':
+        df = pd.read_csv('data/5mdata.csv')
+    else:
+        df = pd.read_csv('data/fulldata.csv')
+    return df
+
+df = load_data(option)
+
+
 
 col1, col2 = st.columns(2)
 
@@ -84,11 +106,16 @@ col2.bar_chart(df['Bwd Blk Rate Avg'])
 
 
 #correration matrix remove all non numeric columns
-df_corr = df.select_dtypes(include=[float, int])
-corr_matrix = df_corr.corr()
+@st.cache_data
+def corr_matrix(df):
+    df_corr = df.select_dtypes(include=[float, int])
+    corr_matrix = df_corr.corr()
+    fig, ax = plt.subplots()
+    sns.heatmap(corr_matrix, ax=ax)
+    return fig
+
 st.write("Correlation Matrix")
-plt.figure(figsize=(20,20))
-haetmap_corr = sns.heatmap(corr_matrix, annot=True)
-st.pyplot(haetmap_corr.figure)
+#plt.figure(figsize=(20,20))
+st.pyplot(corr_matrix(df))
 
 
