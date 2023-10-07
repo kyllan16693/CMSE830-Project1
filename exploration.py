@@ -6,7 +6,7 @@ import networkx as nx
 #df = pd.read_csv('data/final_dataset.csv')
 #df = pd.read_csv('data/minidata.csv')
 
-df = pd.read_csv('data/10kdata.csv')
+df = pd.read_csv('data/final_dataset.csv')
 
 
 #print column names
@@ -17,7 +17,8 @@ df = pd.read_csv('data/10kdata.csv')
 #print all of them non shortened
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
-print(df.head())
+pd.set_option('display.width', None)
+#print(df.head())
 #print(df.count())
 
 #print num of rows
@@ -26,5 +27,9 @@ print(df.head())
 
 
 #print all the unique days 
-#dates = df['Protocol']
-#print(dates)
+#print(df['Timestamp'].str.split(' ').str[0].unique())
+print(df['Label'].unique()) 
+
+#print haed of columns that dont contain Avg, Min, Max, Std, Mean, Tot
+#print(df.columns[~df.columns.str.contains('Avg|Min|Max|Std|Mea|Tot')])
+
