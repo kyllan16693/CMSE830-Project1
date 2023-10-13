@@ -1,0 +1,11 @@
+streamlit
+pandas
+altair
+matplotlib.pyplot
+networkx
+numpy
+sklearn.ensemble
+sklearn.linear_model
+sklearn.model_selection
+sklearn.metrics
+

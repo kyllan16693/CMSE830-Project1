@@ -1,0 +1,102 @@
+'Flow ID': A unique identifier for network flows, which are sequences of packets between a source and destination.
+'Src IP': The source IP address of the network traffic.
+'Src Port': The source port number used for the communication.
+'Dst IP': The destination IP address of the network traffic.
+'Dst Port': The destination port number used for the communication.
+'Protocol': The network protocol used, such as TCP, UDP, or ICMP.
+'Timestamp': The timestamp indicating when the flow was recorded.
+'Flow Duration': The duration of the network flow in seconds.
+'Tot Fwd Pkts': Total number of packets sent in the forward direction.
+'Tot Bwd Pkts': Total number of packets sent in the backward direction.
+'TotLen Fwd Pkts': Total length of packets sent in the forward direction in bytes.
+'TotLen Bwd Pkts': Total length of packets sent in the backward direction in bytes.
+'Fwd Pkt Len Max': Maximum length of a packet in the forward direction.
+'Fwd Pkt Len Min': Minimum length of a packet in the forward direction.
+'Fwd Pkt Len Mean': Mean length of packets in the forward direction.
+'Fwd Pkt Len Std': Standard deviation of packet length in the forward direction.
+'Bwd Pkt Len Max': Maximum length of a packet in the backward direction.
+'Bwd Pkt Len Min': Minimum length of a packet in the backward direction.
+'Bwd Pkt Len Mean': Mean length of packets in the backward direction.
+'Bwd Pkt Len Std': Standard deviation of packet length in the backward direction.
+'Flow Byts/s': Bytes per second in the flow.
+'Flow Pkts/s': Packets per second in the flow.
+'Flow IAT Mean': Mean inter-arrival time of flow packets.
+'Flow IAT Std': Standard deviation of inter-arrival time of flow packets.
+'Flow IAT Max': Maximum inter-arrival time of flow packets.
+'Flow IAT Min': Minimum inter-arrival time of flow packets.
+'Fwd IAT Tot': Total inter-arrival time of forward packets.
+'Fwd IAT Mean': Mean inter-arrival time of forward packets.
+'Fwd IAT Std': Standard deviation of inter-arrival time of forward packets.
+'Fwd IAT Max': Maximum inter-arrival time of forward packets.
+'Fwd IAT Min': Minimum inter-arrival time of forward packets.
+'Bwd IAT Tot': Total inter-arrival time of backward packets.
+'Bwd IAT Mean': Mean inter-arrival time of backward packets.
+'Bwd IAT Std': Standard deviation of inter-arrival time of backward packets.
+'Bwd IAT Max': Maximum inter-arrival time of backward packets.
+'Bwd IAT Min': Minimum inter-arrival time of backward packets.
+'Fwd PSH Flags': Number of packets with the PUSH flag set in the forward direction.
+'Bwd PSH Flags': Number of packets with the PUSH flag set in the backward direction.
+'Fwd URG Flags': Number of packets with the URGENT flag set in the forward direction.
+'Bwd URG Flags': Number of packets with the URGENT flag set in the backward direction.
+'Fwd Header Len': Total header length in the forward direction.
+'Bwd Header Len': Total header length in the backward direction.
+'Fwd Pkts/s': Packets per second in the forward direction.
+'Bwd Pkts/s': Packets per second in the backward direction.
+'Pkt Len Min': Minimum packet length.
+'Pkt Len Max': Maximum packet length.
+'Pkt Len Mean': Mean packet length.
+'Pkt Len Std': Standard deviation of packet length.
+'Pkt Len Var': Variance of packet length.
+'FIN Flag Cnt': Number of packets with the FIN flag set.
+'SYN Flag Cnt': Number of packets with the SYN flag set.
+'RST Flag Cnt': Number of packets with the RESET flag set.
+'PSH Flag Cnt': Number of packets with the PUSH flag set.
+'ACK Flag Cnt': Number of packets with the ACK flag set.
+'URG Flag Cnt': Number of packets with the URGENT flag set.
+'CWE Flag Count': Number of packets with CWE (Common Weakness Enumeration) flag set.
+'ECE Flag Cnt': Number of packets with the ECE (Explicit Congestion Notification Echo) flag set.
+'Down/Up Ratio': Ratio of downstream to upstream traffic.
+'Pkt Size Avg': Average packet size.
+'Fwd Seg Size Avg': Average segment size in the forward direction.
+'Bwd Seg Size Avg': Average segment size in the backward direction.
+'Fwd Byts/b Avg': Average bytes per byte in the forward direction.
+'Fwd Pkts/b Avg': Average packets per byte in the forward direction.
+'Fwd Blk Rate Avg': Average block rate in the forward direction.
+'Bwd Byts/b Avg': Average bytes per byte in the backward direction.
+'Bwd Pkts/b Avg': Average packets per byte in the backward direction.
+'Bwd Blk Rate Avg': Average block rate in the backward direction.
+'Subflow Fwd Pkts': Number of packets in the forward subflow.
+'Subflow Fwd Byts': Number of bytes in the forward subflow.
+'Subflow Bwd Pkts': Number of packets in the backward subflow.
+'Subflow Bwd Byts': Number of bytes in the backward subflow.
+'Init Fwd Win Byts': Initial forward window size.
+'Init Bwd Win Byts': Initial backward window size.
+'Fwd Act Data Pkts': Number of packets with actual data in the forward direction.
+'Fwd Seg Size Min': Minimum segment size in the forward direction.
+'Active Mean': Mean time a connection is active.
+'Active Std': Standard deviation of the time a connection is active.
+'Active Max': Maximum time a connection is active.
+'Active Min': Minimum time a connection is active.
+'Idle Mean': Mean time a connection is idle.
+'Idle Std': Standard deviation of the time a connection is idle.
+'Idle Max': Maximum time a connection is idle.
+'Idle Min': Minimum time a connection is idle.
+'Label': The label assigned to the network traffic. This is the target variable that we want to predict.
+
+Data is from ddos, dos, and benign traffic
+
+brainstorm ideas on how to analyze the data
+
+- what are the most important features?
+- graph the differnece between dos and ddos
+- graph the difference between dos and benign
+- Split into flags, flow, byts, pkts, IAT, subflow only, ect and predict the label
+- Filter by first x mintues and try to detect ddos
+
+
+
+Observations:
+
+Lots of sync flags (SYN, for TCP)
+Lots of ACK flags
+
