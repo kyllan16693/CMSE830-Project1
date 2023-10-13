@@ -34,7 +34,7 @@ df_flow_subflow = df.filter(regex='Flow|Subflow|Label')
 #make a function that repeats this process for all the datasets
 def linreg(df, name):
     #clean up data
-    df = df.drop(columns=['Unnamed: 0']).replace([np.inf, -np.inf], np.nan).dropna()
+    #df = df.drop(columns=['Unnamed: 0']).replace([np.inf, -np.inf], np.nan).dropna()
 
     #split data into train and test
     X = df.drop(columns=['Label'])
