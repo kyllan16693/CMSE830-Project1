@@ -3,7 +3,6 @@ import pandas as pd
 import altair as alt
 import matplotlib.pyplot as plt
 import networkx as nx
-import hiplot as hip
 import numpy as np
 from sklearn.ensemble import IsolationForest
 from sklearn.linear_model import LinearRegression
