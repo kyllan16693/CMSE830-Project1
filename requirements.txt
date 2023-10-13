@@ -4,5 +4,4 @@ altair
 matplotlib
 networkx
 numpy
-skikit-learn
-
+scikit-learn
