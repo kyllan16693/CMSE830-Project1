@@ -1,11 +1,8 @@
 streamlit
 pandas
 altair
-matplotlib.pyplot
+matplotlib
 networkx
 numpy
-sklearn.ensemble
-sklearn.linear_model
-sklearn.model_selection
-sklearn.metrics
+skikit-learn
 
