@@ -12,7 +12,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 pd.option_context('mode.use_inf_as_na', True)
 
-#df = pd.read_csv('data/10kdata.csv')
+df = pd.read_csv('data/clean_dataset.csv')
 
 #read in all datasets and preform linear regression on them
 #put y_test and y_pred into a dictionary with the key being the dataset name
@@ -20,14 +20,13 @@ y_test_dict = {}
 #create a single pyplot figure with all the predictions
 #display the dataframe and the figure with options to select which dataset to view 
 
-df_flow = pd.read_csv('data/Flow_subset.csv')
-df_flow = df_flow.drop(columns=['Flow ID'])
-df_flags = pd.read_csv('data/Flags_subset.csv')
-df_byts = pd.read_csv('data/Byts_subset.csv')
-df_pkts = pd.read_csv('data/Pkts_subset.csv')
-df_iat = pd.read_csv('data/IAT_subset.csv')
-df_subflow = pd.read_csv('data/Subflow_subset.csv')
-df_flow_subflow = pd.concat([df_flow, df_subflow], axis=1)
+df_flow = df.filter(regex='Flow|Label')
+df_flags = df.filter(regex='Flags|Label')
+df_byts = df.filter(regex='Byts|Label')
+df_pkts = df.filter(regex='Pkts|Label')
+df_iat = df.filter(regex='IAT|Label')
+df_subflow = df.filter(regex='Subflow|Label')
+df_flow_subflow = df.filter(regex='Flow|Subflow|Label')
 
 
 
