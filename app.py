@@ -16,7 +16,7 @@ df = pd.read_csv('data/clean_dataset.csv')
 
 #read in all datasets and preform linear regression on them
 #put y_test and y_pred into a dictionary with the key being the dataset name
-y_test_dict = {}
+y_test_df = pd.DataFrame(columns=['subset','y_test', 'y_pred','x_test'])
 #create a single pyplot figure with all the predictions
 #display the dataframe and the figure with options to select which dataset to view 
 
@@ -28,13 +28,13 @@ df_iat = df.filter(regex='IAT|Label')
 df_subflow = df.filter(regex='Subflow|Label')
 df_flow_subflow = df.filter(regex='Flow|Subflow|Label')
 
-
+df_scores = pd.DataFrame(columns=['subset', 'MSE', 'MAE', 'R2'])
 
 
 #make a function that repeats this process for all the datasets
 def linreg(df, name):
     #clean up data
-    #df = df.drop(columns=['Unnamed: 0']).replace([np.inf, -np.inf], np.nan).dropna()
+    df = df.replace([np.inf, -np.inf], np.nan).dropna()
 
     #split data into train and test
     X = df.drop(columns=['Label'])
@@ -46,11 +46,26 @@ def linreg(df, name):
     model = LinearRegression()
     model.fit(X_train, y_train)
 
+    st.write("## "+name)
+    st.write(model.score(X_test, y_test))
+
     #predict on test data
     y_pred = model.predict(X_test)
 
-    #add y_test and y_pred to dictionary
-    y_test_dict[name] = [y_test, y_pred]
+    #add y_test and y_pred to the df
+    #y_test in the format 23254     1\n
+    #extract the number from the string
+
+    y_test_df.loc[len(y_test_df)] = [name, y_test, y_pred, X_test]
+
+    #calculate mse, mae, and r2 and add to df_scores
+    mse = mean_squared_error(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+    
+    df_scores.loc[len(df_scores)] = [name, mse, mae, r2]
+
+    
 
 linreg(df_flow, 'Flow')
 linreg(df_flags, 'Flags')
@@ -59,35 +74,47 @@ linreg(df_pkts, 'Pkts')
 linreg(df_iat, 'IAT')
 linreg(df_subflow, 'Subflow')
 
-#make a dataframe with all the predictions
-st.write(y_test_dict)
 
-#plot the data
-""" st.write("## Predictions")
-st.write(df)
-st.write("### Predictions Plot")
-st.write(alt.Chart(df).mark_circle().encode(
+st.write("## Predictions")
+st.write(y_test_df)
+
+st.write("## Scores")
+st.write(df_scores)
+
+#plot all the predictions on one figure that is interactive
+fig, ax = plt.subplots()
+for i in range(len(y_test_df)):
+    ax.scatter(y_test_df['y_test'][i], y_test_df['y_pred'][i], label=y_test_df['subset'][i])
+ax.set_xlabel('y_test')
+ax.set_ylabel('y_pred')
+ax.legend()
+st.pyplot(fig)
+
+#also plot using altair
+st.write("## Predictions")
+plot_altair = alt.Chart(y_test_df).mark_circle().encode(
     x='y_test',
     y='y_pred',
-    color='Dataset',
-    tooltip=['Dataset', 'y_test', 'y_pred']
-).interactive()) """
+    color='subset'
+).interactive()
+st.altair_chart(plot_altair)
 
 
 
-#make dataframe with all the mse, mae, and r2 scores
-mse_list = []
-mae_list = []
-r2_list = []
-for key, value in y_test_dict.items():
-    y_test, y_pred = value
-    mse_list.append(mean_squared_error(y_test, y_pred))
-    mae_list.append(mean_absolute_error(y_test, y_pred))
-    r2_list.append(r2_score(y_test, y_pred))
 
-df_scores = pd.DataFrame({'MSE': mse_list, 'MAE': mae_list, 'R2': r2_list}, index=y_test_dict.keys())
+#plot the predictions for each dataset on a separate figure
+for i in range(len(y_test_df)):
+    fig, ax = plt.subplots()
+    ax.scatter(y_test_df['y_test'][i], y_test_df['y_pred'][i])
+    ax.set_xlabel('y_test')
+    ax.set_ylabel('y_pred')
+    ax.set_title(y_test_df['subset'][i])
+    st.pyplot(fig)
 
-st.write(df_scores)
+
+
+
+
 
 """ st.header("Distribution Plots")
 fig, ax = plt.subplots()
