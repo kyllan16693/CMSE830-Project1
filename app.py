@@ -173,10 +173,28 @@ with tab5:
     st.write("The graphic above shows the relationship between the IAT metrics and the label. The x and y variables can be manipulated to explore different aspects of the data, which can help identify patterns and anomalies associated with malicious activities. \n\nFor instance, a sudden and significant spike in Fwd IAT Tot or Bwd IAT Tot might indicate a distributed denial-of-service (DDoS) attack, where an abnormal amount of data is sent or received within a short period. Conversely, examining the ratio of these metrics and their patterns over time could reveal normal, benign traffic behavior. By empowering users to experiment with these variables, they can better understand network patterns and make informed decisions regarding potential threats or benign traffic.")
 
 
-
-
-
 #below tabs
+
+st.header("Active vs. Idle Connections")
+
+#bar chart of Active Mean split by label into 2 charts next to each other
+col1, col2 = st.columns(2)
+with col1:
+    st.write("Active Mean")
+    df_active = df.filter(regex='Act Mean|Label')
+    df_active['Label'] = df_active['Label'].replace({'Benign': 'Benign Active', 'Attack': 'Attack Active'})
+    st.bar_chart(df_active.groupby('Label').mean())
+with col2:
+    st.write("Idle Mean")
+    df_idle = df.filter(regex='Idle Mean|Label')
+    df_idle['Label'] = df_idle['Label'].replace({'Benign': 'Benign Idle', 'Attack': 'Attack Idle'})
+    st.bar_chart(df_idle.groupby('Label').mean())
+    
+
+
+
+
+#data
 st.markdown("##")
 st.header("About the Data")
 st.write("The data is from a collaborative project between the Communications Security Establishment (CSE) & the Canadian Institute for Cybersecurity (CIC)")

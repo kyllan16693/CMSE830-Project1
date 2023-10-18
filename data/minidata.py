@@ -1,5 +1,5 @@
 import pandas as pd
-df = pd.read_csv('final_dataset.csv')
+#df = pd.read_csv('final_dataset.csv')
 
 
 #only keep the first 10000 rows
@@ -58,8 +58,18 @@ for name in namelist:
 
 
 
-df = df.drop(columns=['Unnamed: 0'])
+""" df = df.drop(columns=['Unnamed: 0'])
 df = df.drop(columns=['Flow ID'])
 df = df.dropna()
 df['Label'] = df['Label'].eq('ddos').mul(1)
-df.sample(n=200000).to_csv('clean_dataset.csv')
+df.sample(n=200000).to_csv('clean_dataset.csv') """
+
+
+#Unused data that is motly zeros or not very helpful
+#Active Mean, Active Std, Active Max, Active Min, Idle Mean, Idle Std, Idle Max, Idle Min,
+#Fwd Seg Size Avg, Bwd Seg Size Avg, Fwd Blk Rate Avg, Bwd Blk Rate Avg, Fwd Seg Size Min,
+#Fwd Header Len, Bwd Header Len, Protocol, 
+df = pd.read_csv('clean_dataset.csv')
+df = df.drop(columns=['Active Mean', 'Active Std', 'Active Max', 'Active Min', 'Idle Mean', 'Idle Std', 'Idle Max', 'Idle Min', 'Fwd Seg Size Avg', 'Bwd Seg Size Avg', 'Fwd Blk Rate Avg', 'Bwd Blk Rate Avg', 'Fwd Seg Size Min', 'Fwd Header Len', 'Bwd Header Len', 'Protocol'])
+df = df.dropna()
+df.to_csv('clean_dataset.csv')

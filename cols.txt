@@ -100,3 +100,28 @@ Observations:
 Lots of sync flags (SYN, for TCP)
 Lots of ACK flags
 
+
+dont use:
+Flow ID
+Protocol
+Timestamp
+Fwd Header Len
+Bwd Header Len
+Down/Up Ratio
+Fwd Seg Size Avg
+Bwd Seg Size Avg
+Fwd Blk Rate Avg
+Bwd Blk Rate Avg
+Fwd Seg Size Min
+
+Active Mean
+Active Std
+Active Max
+Active Min
+
+Idle Mean
+Idle Std
+Idle Max
+Idle Min
+
+histogram of each idle and active vs label
