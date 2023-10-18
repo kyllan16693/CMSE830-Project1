@@ -4,12 +4,18 @@ import altair as alt
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report, confusion_matrix
 
 pd.option_context('mode.use_inf_as_na', True)
 
 df = pd.read_csv('data/clean_dataset.csv')
 df.drop(columns=['Unnamed: 0'], inplace=True)
 df['Label'] = df['Label'].replace({0: 'Benign', 1: 'Attack'})
+df = df.replace([np.inf, -np.inf], np.nan)
+df = df.dropna()
 
 #sidebar
 #create a sidebar with an expander for deffintions of terms
@@ -29,12 +35,12 @@ st.sidebar.write("DNS: Translates domain names to IP addresses for web communica
 st.sidebar.write("IP Address: Unique label assigned to devices for network identification.")
 
 
-
 #main page
 st.markdown("<h1 style='text-align: center;'>Cyber Attack Data Explorer</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: grey; font-style: italic;'>Kyllan Wunder</p>", unsafe_allow_html=True)
 
 st.write("In the rapidly evolving digital landscape, cyberattacks have emerged as a persistent and formidable challenge. Among the most prevalent are Denial of Service (DoS) and Distributed Denial of Service (DDoS) attacks. DoS attacks involve a malevolent actor overwhelming a targeted system, network, or service with a surge of traffic, often from a single source, rendering it inaccessible to legitimate users. DDoS attacks take this tactic to a more sophisticated level, orchestrating an onslaught from multiple sources, thereby increasing the magnitude of disruption. The primary goal in both cases is to cripple the target's functionality, causing inconvenience and financial losses. An understanding of these terms is pivotal in navigating the intricate world of modern cyber threats and reinforces the critical importance of cybersecurity measures to protect against such disruptive incursions.")
+
 
 #Illustrating DoS and DDoS Attacks
 st.header("Illustrating DoS and DDoS Attacks")
@@ -71,6 +77,38 @@ st.pyplot(fig)
 
 st.write("In a DDoS scenario, a single attacker orchestrates a network of multiple servers to launch a coordinated assault on a target. This approach magnifies the scale of the attack, making it even more challenging to defend against. The visual representation underscores the complexity of DDoS attacks and the pressing need for comprehensive cybersecurity strategies to fend off such widespread disruptions.")
 
+
+#differences in attack vs benign traffic
+st.header("Differences in Attack vs. Benign Traffic")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.header("Benign Traffic")
+    fig, ax = plt.subplots(figsize=(12, 6))
+    plt.title("Benign Traffic Bytes per Second")
+    plt.hist(np.log(df[df['Label'] == 'Benign']['Flow Byts/s']).replace([np.inf, -np.inf], np.nan))
+    st.pyplot(fig)
+    fig, ax = plt.subplots(figsize=(12, 6))
+    plt.title("Benign Traffic Packets per Second")
+    plt.hist(np.log(df[df['Label'] == 'Benign']['Flow Pkts/s']).replace([np.inf, -np.inf], np.nan))
+    st.pyplot(fig)
+    
+with col2:
+    st.header("Attack Traffic")
+    fig, ax = plt.subplots(figsize=(12, 6))
+    plt.title("Attack Traffic Bytes per Second")
+    plt.hist(np.log(df[df['Label'] == 'Attack']['Flow Byts/s']).replace([np.inf, -np.inf], np.nan))
+    st.pyplot(fig)
+    fig, ax = plt.subplots(figsize=(12, 6))
+    plt.title("Attack Traffic Packets per Second")
+    plt.hist(np.log(df[df['Label'] == 'Attack']['Flow Pkts/s']).replace([np.inf, -np.inf], np.nan))
+    st.pyplot(fig)
+
+st.write("(Note: The log scale is used to better visualize the data.)")
+st.write("Looking at the distribution of bytes per second and packets per second, we can see that the benign traffic shows an almost normal distribution, while the attack traffic is skewed. This is because the attack traffic is much more concentrated than the benign traffic. This is a key difference between the two types of traffic, and can be used to identify attacks as it is much more uniform than benign traffic.")
+
+
 #port analysis
 st.header("Port Traffic Patterns")
 col1, col2, col3 = st.columns(3)
@@ -86,7 +124,6 @@ with col3:
     st.write((df['Dst Port'].value_counts()+df['Src Port'].value_counts()).sort_values(ascending=False))
 
 st.markdown("Port analysis is fundamental for network traffic examination. It provides insights into communication patterns and security risks.\n- **Port 80** is HTTP (Hypertext Transfer Protocol), the protocol for the web. It is the most commonly used port for web traffic.\n - **Port 443** is HTTPS (Hypertext Transfer Protocol Secure), the protocol for secure web traffic. It is meant to replace HTTP with a more secure connection.\n- **Port 53** is for mapping domain names to IP addresses (DNS). \n- **Port 3389** is Remote Desktop Protocol, the protocol for remote access to a computer.\n- **Port 445** is used by Microsoft Directory Services for Active Directory and for the Server Message Block.")
-
 
 
 #analysis tabs
@@ -175,23 +212,48 @@ with tab5:
 
 #below tabs
 
-st.header("Active vs. Idle Connections")
 
-#bar chart of Active Mean split by label into 2 charts next to each other
+#using nearest neighbors to classify attack or benign
+st.header("Using Nearest Neighbors to Classify Attack or Benign")
+st.write("The nearest neighbors algorithm is a classification algorithm that classifies data points based on their proximity to other data points. In this case, the data points are network traffic data points, and the algorithm classifies them as either attack or benign. The algorithm works by calculating the distance between the data point in question and the k nearest neighbors. The algorithm then classifies the data point based on the majority class of the k nearest neighbors. The k value can be changed to see how it affects the classification.")
+
+df_nn = df.filter(regex='Pkts|Byts|Label')
+df_nn['Label'] = df_nn['Label'].replace({'Benign': 0, 'Attack': 1})
+df_nn = df_nn.replace([np.inf, -np.inf], np.nan)
+df_nn = df_nn.dropna()
+
+X = df_nn.drop(columns=['Label'])
+y = df_nn['Label']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+model = KNeighborsClassifier(n_neighbors=5)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+confusion_df = pd.DataFrame(confusion_matrix(y_test, y_pred))
+confusion_df.rename(columns={0: 'True Benign', 1: 'True Attack'}, index={0: 'predicted Benign', 1: 'predicted Attack'}, inplace=True)
+
+st.write(confusion_df)
+st.write("The confusion matrix above shows the results of the classification. The top left is the true negatives, the top right is the false positives, the bottom left is the false negatives, and the bottom right is the true positives. The classification report below shows the precision, recall, f1-score, and support for the classification.")
+st.write("Accuracy: ", model.score(X_test, y_test))
+st.write("R Squared: ", model.score(X_test, y_test))
+st.write("Mean Absolute Error: ", np.mean(np.abs(y_test - y_pred)))
+st.write("Mean Squared Error: ", np.mean((y_test - y_pred)**2))
+
+st.header("Model details")
 col1, col2 = st.columns(2)
 with col1:
-    st.write("Active Mean")
-    df_active = df.filter(regex='Act Mean|Label')
-    df_active['Label'] = df_active['Label'].replace({'Benign': 'Benign Active', 'Attack': 'Attack Active'})
-    st.bar_chart(df_active.groupby('Label').mean())
+    st.write("This model used the following features: ", X.columns)
 with col2:
-    st.write("Idle Mean")
-    df_idle = df.filter(regex='Idle Mean|Label')
-    df_idle['Label'] = df_idle['Label'].replace({'Benign': 'Benign Idle', 'Attack': 'Attack Idle'})
-    st.bar_chart(df_idle.groupby('Label').mean())
-    
-
-
+    st.write("The model was trained on ", len(X_train), " or ", round(len(X_train)/len(X)*100,3), "% of the data.")
+    st.write("The model was tested on ", len(X_test), " or ", round(len(X_test)/len(X)*100,3), "% of the data.")
+    st.write("The model use the following parameters: ", model.get_params())
+    st.write("and used ",model.n_neighbors, "as the number of neighbors")
 
 
 #data
@@ -199,8 +261,6 @@ st.markdown("##")
 st.header("About the Data")
 st.write("The data is from a collaborative project between the Communications Security Establishment (CSE) & the Canadian Institute for Cybersecurity (CIC)")
 st.write("The data is available at https://www.unb.ca/cic/datasets/ids-2018.html")
-
-
 
 
 #end
