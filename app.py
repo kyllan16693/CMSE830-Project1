@@ -50,7 +50,7 @@ st.markdown("<h1 style='text-align: center;'>Cyber Attack Data Explorer</h1>",
 st.markdown("<p style='text-align: center; color: grey; font-style: italic;'>Kyllan Wunder</p>",
             unsafe_allow_html=True)
 
-st.write("In the rapidly evolving digital landscape, cyberattacks have emerged as a persistent and formidable challenge. Among the most prevalent are Denial of Service (DoS) and Distributed Denial of Service (DDoS) attacks. DoS attacks involve a malevolent actor overwhelming a targeted system, network, or service with a surge of traffic, often from a single source, rendering it inaccessible to legitimate users. DDoS attacks take this tactic to a more sophisticated level, orchestrating an onslaught from multiple sources, thereby increasing the magnitude of disruption. The primary goal in both cases is to cripple the target's functionality, causing inconvenience and financial losses. An understanding of these terms is pivotal in navigating the intricate world of modern cyber threats and reinforces the critical importance of cybersecurity measures to protect against such disruptive incursions.")
+st.write("In the rapidly evolving digital landscape, cyberattacks have emerged as a persistent and formidable challenge. Among the most prevalent are Denial of Service (DoS) and Distributed Denial of Service (DDoS) attacks. DoS attacks involve a malicious actor overwhelming a targeted system, network, or service with a surge of traffic, often from a single source, rendering it inaccessible to legitimate users. DDoS attacks take this tactic to a more sophisticated level, orchestrating an onslaught from multiple sources, thereby increasing the magnitude of disruption. The primary goal in both cases is to cripple the target's functionality, causing inconvenience and potentially financial losses.")
 
 
 # Illustrating DoS and DDoS Attacks
@@ -81,7 +81,7 @@ nx.draw(dos_graph, node_positions, with_labels=True,
         node_size=5000, node_color='lightblue')
 st.pyplot(fig)
 
-st.write("In this scenario, the attacker's goal is to overwhelm the target, rendering it inaccessible to legitimate users. The simplicity of the attack depicted here underscores the disruptive potential of DoS attacks and highlights the importance of defensive measures to mitigate their impact.")
+st.write("In a DoS scenario, a single attacker targets a single server to launch an attack. The visual representation highlights the simplicity of this approach, which involves a single point of attack and a single point of failure.")
 
 fig, ax = plt.subplots(figsize=(12, 6))
 plt.title("Distributed Denial of Service (DDoS)\n(Multiple Attack Points)")
@@ -89,16 +89,17 @@ nx.draw(ddos_graph, node_positions, with_labels=True,
         node_size=5000, node_color='lightblue')
 st.pyplot(fig)
 
-st.write("In a DDoS scenario, a single attacker orchestrates a network of multiple servers to launch a coordinated assault on a target. This approach magnifies the scale of the attack, making it even more challenging to defend against. The visual representation underscores the complexity of DDoS attacks and the pressing need for comprehensive cybersecurity strategies to fend off such widespread disruptions.")
-
+st.write("In a DDoS scenario, multiple attackers target multiple servers to launch an attack. The visual representation highlights the complexity of this approach, which involves multiple points of attack and could include multiple points of failure.")
 
 # differences in attack vs benign traffic
-st.header("Differences in Attack vs. Benign Traffic")
+st.header("Differences in Traffic")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    st.header("Benign Traffic")
+    #st.header("Benign Traffic")
+    #center
+    st.markdown("<h3 style='text-align: center;'>Benign Traffic</h3>", unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(12, 6))
     plt.title("Benign Traffic Bytes per Second")
     plt.hist(np.log(df[df['Label'] == 'Benign']
@@ -111,7 +112,9 @@ with col1:
     st.pyplot(fig)
 
 with col2:
-    st.header("Attack Traffic")
+    #st.header("Attack Traffic")
+    #center
+    st.markdown("<h3 style='text-align: center;'>Attack Traffic</h3>", unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(12, 6))
     plt.title("Attack Traffic Bytes per Second")
     plt.hist(np.log(df[df['Label'] == 'Attack']
@@ -123,7 +126,7 @@ with col2:
              ['Flow Pkts/s']).replace([np.inf, -np.inf], np.nan))
     st.pyplot(fig)
 
-st.write("(Note: The log scale is used to better visualize the data.)")
+st.write("(Note: The log scale is used to better visualize the data, values are not represented accurately.)")
 st.write("Looking at the distribution of bytes per second and packets per second, we can see that the benign traffic shows an almost normal distribution, while the attack traffic is skewed. This is because the attack traffic is much more concentrated than the benign traffic. This is a key difference between the two types of traffic, and can be used to identify attacks as it is much more uniform than benign traffic.")
 
 
@@ -159,9 +162,9 @@ with tab1:
     df_packet = df.filter(regex='Pkts|Label')
 
     x_axis = st.selectbox(
-        'Select x-axis', df_packet.drop(columns=['Label']).columns)
+        'Select x-axis', df_packet.drop(columns=['Label']).columns, index=0)
     y_axis = st.selectbox(
-        'Select y-axis', df_packet.drop(columns=['Label']).columns)
+        'Select y-axis', df_packet.drop(columns=['Label']).columns, index=1)
 
     st.scatter_chart(df_packet,
                      x=x_axis,
@@ -193,9 +196,9 @@ with tab3:
     df_flow = df.filter(regex='Flow|Label')
 
     x_axis = st.selectbox(
-        'Select x-axis', df_flow.drop(columns=['Label']).columns)
+        'Select x-axis', df_flow.drop(columns=['Label']).columns, index=3)
     y_axis = st.selectbox(
-        'Select y-axis', df_flow.drop(columns=['Label']).columns)
+        'Select y-axis', df_flow.drop(columns=['Label']).columns, index=4)
 
     st.scatter_chart(df_flow,
                      x=x_axis,
@@ -210,9 +213,9 @@ with tab4:
     df_subflow = df.filter(regex='Subflow|Label')
 
     x_axis = st.selectbox(
-        'Select x-axis', df_subflow.drop(columns=['Label']).columns)
+        'Select x-axis', df_subflow.drop(columns=['Label']).columns, index=1)
     y_axis = st.selectbox(
-        'Select y-axis', df_subflow.drop(columns=['Label']).columns)
+        'Select y-axis', df_subflow.drop(columns=['Label']).columns, index=2)
 
     st.scatter_chart(df_subflow,
                      x=x_axis,
@@ -228,9 +231,9 @@ with tab5:
     df_IAT = df.filter(regex='IAT|Label')
 
     x_axis = st.selectbox(
-        'Select x-axis', df_IAT.drop(columns=['Label']).columns)
+        'Select x-axis', df_IAT.drop(columns=['Label']).columns, index=0)
     y_axis = st.selectbox(
-        'Select y-axis', df_IAT.drop(columns=['Label']).columns)
+        'Select y-axis', df_IAT.drop(columns=['Label']).columns, index=1)
 
     st.scatter_chart(df_IAT,
                      x=x_axis,
@@ -249,6 +252,7 @@ st.write("The nearest neighbors algorithm is a classification algorithm that cla
 st.write("View the results of the model I have created then change the hyper parameters to see how it affects the model, see if you can improve the model!")
 
 st.header("Model hyper parameters")
+st.write("View the results of my model then change the hyper parameters to see how it affects the model, see if you can improve the model!")
 
 col1, col2 = st.columns(2)
 
@@ -296,10 +300,10 @@ with col3:
     st.write(confusion_df)
     st.write("The confusion matrix shows the results of the classification, we want all of the values to land in the true positive and true negative quadrants. A true positive is when the data given is from an attack and the model predicts that it is an attack. A true negative is when the data given is benign and the model predicts that it is benign.")
 with col4:
-    st.write("Accuracy: ", model.score(X_test, y_test))
-    st.write("Mean Squared Error: ", mean_squared_error(y_test, y_pred))
-    st.write("R Squared: ", r2_score(y_test, y_pred))
-    st.write("The classification report shows the precision, recall, f1-score, and support for the classification.")
+    st.write("Accuracy: ", round(model.score(X_test, y_test)*100,4), "%")
+    st.write("Mean Squared Error: ", round(mean_squared_error(y_test, y_pred),4))
+    st.write("R Squared: ", round(r2_score(y_test, y_pred),4))
+    st.write("The accuracy of the model is the percentage of data points that were correctly classified. The mean squared error is the average of the squared differences between the predicted and actual values. The R squared is the proportion of the variance in the dependent variable that is predictable from the independent variable(s).")
 
 
 st.header("Model details")
@@ -318,7 +322,8 @@ with col6:
 # data
 st.header("About the Data")
 st.write("The data is from a collaborative project between the Communications Security Establishment (CSE) & the Canadian Institute for Cybersecurity (CIC)")
-st.write("The data is available at https://www.unb.ca/cic/datasets/ids-2018.html")
+st.write("The data is available at https://www.unb.ca/cic/datasets/ids-2018.html or https://registry.opendata.aws/cse-cic-ids2018/")
+st.write("The attack data is from simulated attacks on a network, the benign data is from normal network traffic.")
 
 
 # end
