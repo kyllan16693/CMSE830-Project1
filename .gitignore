@@ -1,4 +1,4 @@
 /data/*
 !/data/minidata.py
 !/data/clean_dataset.csv
-
+/exploration/*
