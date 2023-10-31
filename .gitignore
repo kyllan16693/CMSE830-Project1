@@ -2,3 +2,4 @@
 !/data/minidata.py
 !/data/clean_dataset.csv
 /exploration/*
+.DS_Store
