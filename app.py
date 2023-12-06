@@ -10,8 +10,12 @@ from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 
-df = pd.read_csv('data/clean_dataset_v2.csv')
-df = df.loc[:, ~df.columns.str.contains('Unnamed')]
+@st.cache_data
+def get_df():
+    df = pd.read_csv('data/clean_dataset_v2.csv')
+    df = df.loc[:, ~df.columns.str.contains('Unnamed')]
+    return df
+df = get_df()
 
 
 # main page
@@ -20,7 +24,7 @@ st.markdown("<h1 style='text-align: center;'>Cyber Attack Data Explorer</h1>",
 st.markdown("<p style='text-align: center; color: grey; font-style: italic;'>Kyllan Wunder</p>",
             unsafe_allow_html=True)
 
-st.write("In the rapidly evolving digital landscape, cyberattacks have emerged as a persistent and formidable challenge. Among the most prevalent are Denial of Service (DoS) and Distributed Denial of Service (DDoS) attacks. DoS attacks involve a malicious actor overwhelming a targeted system, network, or service with a surge of traffic, often from a single source, rendering it inaccessible to legitimate users. DDoS attacks take this tactic to a more sophisticated level, orchestrating an onslaught from multiple sources, thereby increasing the magnitude of disruption. The primary goal in both cases is to cripple the target's functionality, causing inconvenience and potentially financial losses.")
+st.write("In the rapidly evolving digital landscape, cyberattacks have emerged as a persistent and formidable challenge. Among the most prevalent are Denial of Service (DoS) and Distributed Denial of Service (DDoS) attacks. DoS attacks involve a malicious actor overwhelming a targeted system, network, or service with a surge of traffic, often from a single source, rendering it inaccessible to legitimate users. DDoS attacks take this tactic to a more sophisticated level, orchestrating an onslaught from multiple sources, thereby increasing the magnitude of disruption. The primary goal in both cases is to cripple the target's functionality, causing inconvenience and potential financial losses.")
 
 
 # Illustrating DoS and DDoS Attacks
@@ -59,7 +63,7 @@ nx.draw(ddos_graph, node_positions, with_labels=True,
         node_size=5000, node_color='lightblue')
 st.pyplot(fig)
 
-st.write("In a DDoS scenario, multiple attackers target multiple servers to launch an attack. The visual representation highlights the complexity of this approach, which involves multiple points of attack and could include multiple points of failure.")
+st.write("In a DDoS scenario, a single attacker (or multiple) uses multiple servers to launch an attack. The visual representation highlights the complexity of this approach, which involves multiple points of attack and could include multiple points of failure.")
 
 
 # differences in attack vs benign traffic
@@ -72,14 +76,18 @@ with col1:
     st.markdown("<h3 style='text-align: center;'>Benign Traffic</h3>", unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(12, 6))
     plt.title("Benign Traffic Bytes per Second")
-    plt.hist(np.log(df[df['Label'] == 'Benign']
-             ['Flow Byts/s']+1).replace([np.inf, -np.inf], np.nan))
+    @st.cache_data
+    def get_benign_bytes():
+        return np.log(df[df['Label'] == 'Benign']['Flow Byts/s']+1).replace([np.inf, -np.inf], np.nan)
+    plt.hist(get_benign_bytes())
     plt.ylim(0, 26000)
     st.pyplot(fig)
     fig, ax = plt.subplots(figsize=(12, 6))
     plt.title("Benign Traffic Packets per Second")
-    plt.hist(np.log(df[df['Label'] == 'Benign']
-             ['Flow Pkts/s']+1).replace([np.inf, -np.inf], np.nan))
+    @st.cache_data
+    def get_benign_packets():
+        return np.log(df[df['Label'] == 'Benign']['Flow Pkts/s']+1).replace([np.inf, -np.inf], np.nan)
+    plt.hist(get_benign_packets())
     plt.ylim(0, 20000)
     st.pyplot(fig)
 
@@ -88,19 +96,23 @@ with col2:
     st.markdown("<h3 style='text-align: center;'>Attack Traffic</h3>", unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(12, 6))
     plt.title("Attack Traffic Bytes per Second")
-    plt.hist(np.log(df[df['Label'] == 'Attack']
-             ['Flow Byts/s']+1).replace([np.inf, -np.inf], np.nan))
+    @st.cache_data
+    def get_attack_bytes():
+        return np.log(df[df['Label'] == 'Attack']['Flow Byts/s']+1).replace([np.inf, -np.inf], np.nan)
+    plt.hist(get_attack_bytes())
     plt.ylim(0, 26000)
     st.pyplot(fig)
     fig, ax = plt.subplots(figsize=(12, 6))
     plt.title("Attack Traffic Packets per Second")
-    plt.hist(np.log(df[df['Label'] == 'Attack']
-             ['Flow Pkts/s']+1).replace([np.inf, -np.inf], np.nan))
+    @st.cache_data
+    def get_attack_packets():
+        return np.log(df[df['Label'] == 'Attack']['Flow Pkts/s']+1).replace([np.inf, -np.inf], np.nan)
+    plt.hist(get_attack_packets())
     plt.ylim(0, 20000)
     st.pyplot(fig)
 
-st.write("(Note: The log scale is used to better visualize the data, values are not represented accurately.)")
-st.write("Looking at the distribution of bytes per second and packets per second, we can see that the benign traffic shows an almost normal distribution, while the attack traffic is skewed. This is because the attack traffic is much more concentrated than the benign traffic. This is a key difference between the two types of traffic, and can be used to identify attacks as it is much more uniform than benign traffic.")
+st.caption("(A log scale is used to better visualize the data, values are not represented accurately.)")
+st.write("Looking at the distribution of bytes per second and packets per second, we can see that the benign traffic shows an almost uniform distribution, while the attack traffic is skewed. This is because the attack traffic is much more concentrated than the benign traffic. This is a key difference between the two types of traffic and can be used to identify attacks as it is much more uniform than benign traffic.")
 
 
 # port analysis
@@ -118,7 +130,7 @@ with col3:
     st.write((df['Dst Port'].value_counts() +
              df['Src Port'].value_counts()).sort_values(ascending=False))
 
-st.markdown("Port analysis is fundamental for network traffic examination. It provides insights into communication patterns and security risks.\n- **Port 80** is HTTP (Hypertext Transfer Protocol), the protocol for the web. It is the most commonly used port for web traffic.\n - **Port 443** is HTTPS (Hypertext Transfer Protocol Secure), the protocol for secure web traffic. It is meant to replace HTTP with a more secure connection.\n- **Port 53** is for mapping domain names to IP addresses (DNS). \n- **Port 3389** is Remote Desktop Protocol, the protocol for remote access to a computer.\n- **Port 445** is used by Microsoft Directory Services for Active Directory and for the Server Message Block.")
+st.markdown("Port analysis is fundamental for network traffic examination. It provides insights into communication patterns and security risks.\n- **Port 80** is HTTP (Hypertext Transfer Protocol), the protocol for the web. It is the most commonly used port for web traffic.\n - **Port 443** is HTTPS (Hypertext Transfer Protocol Secure), the protocol for secure web traffic. It is meant to replace HTTP with a more secure connection.\n- **Port 53** is for mapping domain names to IP addresses (DNS). \n- **Port 3389** is Remote Desktop Protocol, the protocol for remote access to a computer.\n- **Port 445** is used by Microsoft Directory Services for Active Directory and the Server Message Block.")
 
 
 # analysis tabs
@@ -132,12 +144,19 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(
 with tab1:
     st.header("Packet Analysis")
     st.write("A packet is a unit of data that is routed between an origin and a destination on a network. Packet analysis is a crucial component of network traffic analysis, as it provides a comprehensive view of the network traffic behavior. In this section, we will explore the packet metrics and their relationship with cyber attacks.")
-    df_packet = df.filter(regex='Pkts|Label')
+    
+    @st.cache_data
+    def get_packet_df():
+        return df.filter(regex='Pkts|Label')
+    df_packet = get_packet_df()
+    @st.cache_data
+    def get_packet_cols():
+        return df_packet.drop(columns=['Label']).columns
 
     x_axis = st.selectbox(
-        'Select x-axis', df_packet.drop(columns=['Label']).columns, index=0)
+        'Select x-axis', get_packet_cols())
     y_axis = st.selectbox(
-        'Select y-axis', df_packet.drop(columns=['Label']).columns, index=1)
+        'Select y-axis', get_packet_cols())
     
     st.scatter_chart(df_packet,
                      x=x_axis,
@@ -149,12 +168,19 @@ with tab1:
 with tab2:
     st.header("Byte Analysis")
     st.write("Bytes are the fundamental units of data transmission in a network. Byte analysis is a crucial component of network traffic analysis, as it provides a comprehensive view of the network traffic behavior. In this section, we will explore the byte metrics and their relationship with cyber attacks.")
-    df_byte = df.filter(regex='Byts|Label')
+    
+    @st.cache_data
+    def get_byte_df():
+        return df.filter(regex='Byts|Label')
+    df_byte = get_byte_df()
+    @st.cache_data
+    def get_byte_cols():
+        return df_byte.drop(columns=['Label']).columns
 
     x_axis = st.selectbox(
-        'Select x-axis', df_byte.drop(columns=['Label']).columns)
+        'Select x-axis', get_byte_cols())
     y_axis = st.selectbox(
-        'Select y-axis', df_byte.drop(columns=['Label']).columns)
+        'Select y-axis', get_byte_cols())
 
     st.scatter_chart(df_byte,
                      x=x_axis,
@@ -166,12 +192,19 @@ with tab2:
 with tab3:
     st.header("Flow Analysis")
     st.write("A flow is a sequence of packets that share the same source and destination IP addresses, the same source and destination ports, and the same protocol. Flow analysis is a crucial component of network traffic analysis, as it provides a comprehensive view of the network traffic behavior. In this section, we will explore the flow metrics and their relationship with cyber attacks.")
-    df_flow = df.filter(regex='Flow|Label')
+    
+    @st.cache_data
+    def get_flow_df():
+        return df.filter(regex='Flow|Label')
+    df_flow = get_flow_df()
+    @st.cache_data
+    def get_flow_cols():
+        return df_flow.drop(columns=['Label']).columns
 
     x_axis = st.selectbox(
-        'Select x-axis', df_flow.drop(columns=['Label']).columns, index=3)
+        'Select x-axis', get_flow_cols())
     y_axis = st.selectbox(
-        'Select y-axis', df_flow.drop(columns=['Label']).columns, index=4)
+        'Select y-axis', get_flow_cols())
 
     st.scatter_chart(df_flow,
                      x=x_axis,
@@ -183,12 +216,19 @@ with tab3:
 with tab4:
     st.header("Subflow Analysis")
     st.write("In the analysis of network traffic data, understanding subflows is essential. Subflows represent distinct segments within established network connections, providing a closer look at the behavior of data transmission.")
-    df_subflow = df.filter(regex='Subflow|Label')
+    
+    @st.cache_data
+    def get_subflow_df():
+        return df.filter(regex='Subflow|Label')
+    df_subflow = get_subflow_df()
+    @st.cache_data
+    def get_subflow_cols():
+        return df_subflow.drop(columns=['Label']).columns
 
     x_axis = st.selectbox(
-        'Select x-axis', df_subflow.drop(columns=['Label']).columns, index=1)
+        'Select x-axis', get_subflow_cols())
     y_axis = st.selectbox(
-        'Select y-axis', df_subflow.drop(columns=['Label']).columns, index=2)
+        'Select y-axis', get_subflow_cols())
 
     st.scatter_chart(df_subflow,
                      x=x_axis,
@@ -201,12 +241,19 @@ with tab4:
 with tab5:
     st.header("IAT Analysis")
     st.write("Inter-Arrival Time (IAT) refers to the time duration between the arrivals of consecutive network packets or events. IAT analysis is a crucial component of network traffic analysis, as it provides a comprehensive view of the network traffic behavior. In this section, we will explore the IAT metrics and their relationship with cyber attacks.")
-    df_IAT = df.filter(regex='IAT|Label')
+    
+    @st.cache_data
+    def get_IAT_df():
+        return df.filter(regex='IAT|Label')
+    df_IAT = get_IAT_df()
+    @st.cache_data
+    def get_IAT_cols():
+        return df_IAT.drop(columns=['Label']).columns
 
     x_axis = st.selectbox(
-        'Select x-axis', df_IAT.drop(columns=['Label']).columns, index=0)
+        'Select x-axis', get_IAT_cols())
     y_axis = st.selectbox(
-        'Select y-axis', df_IAT.drop(columns=['Label']).columns, index=1)
+        'Select y-axis', get_IAT_cols())
 
     st.scatter_chart(df_IAT,
                      x=x_axis,
@@ -220,10 +267,10 @@ with tab5:
 
 # using nearest neighbors to classify attack or benign
 st.header("Using Machine Learning to Predict Attacks")
-st.write("The k-nearest neighbors algorithm is a classification algorithm that classifies data points based on their proximity to other data points. In this case, the data points are network traffic data points, and the algorithm classifies them as either attack or benign. The algorithm works by calculating the distance between the data point in question and the k nearest neighbors (k being any nuber we want). The algorithm then classifies the data point based on the majority class of the k nearest neighbors. The k value can be changed to see how it affects the classification.")
+st.write("The k-nearest neighbors algorithm is a classification algorithm that classifies data points based on their proximity to other data points. In this case, the data points are network traffic data points, and the algorithm classifies them as either attack or benign. The algorithm works by calculating the distance between the data point in question and the k nearest neighbors (k being any number we want). The algorithm then classifies the data point based on the majority class of the k nearest neighbors. The k value can be changed to see how it affects the classification.")
 
-st.subheader("KNN Model hyper parameters")
-st.write("View the results of my model then change the hyper parameters to see how it affects the model, see if you can improve the model!")
+st.subheader("KNN Model hyperparameters")
+st.write("View the results of my model then change the hyperparameters to see how it affects the model, and see if you can improve the model!")
 
 col1, col2 = st.columns(2)
 
@@ -234,12 +281,12 @@ with col1:
     algorithm = st.selectbox(
         'Select the algorithm used to compute the nearest neighbors', ['auto', 'ball_tree', 'kd_tree', 'brute'])
     metric = st.selectbox(
-        'Select the function used to compute distance between points', ['minkowski', 'euclidean', 'manhattan', 'chebyshev'])
+        'Select the function used to compute the distance between points', ['minkowski', 'euclidean', 'manhattan', 'chebyshev'])
     
 with col2:
     neighbors = st.slider('Number of Neighbors used for classification', 1, 20, 5)
     test_size = st.slider('Percentage of data used for testing', 0.05, 0.5, 0.2)
-    weights = st.selectbox('Select the function used in prediction', ['uniform', 'distance'])
+    weights = st.selectbox('Select the function used in the prediction', ['uniform', 'distance'])
 
 df_nn = df.filter(regex=regex)
 
@@ -270,7 +317,7 @@ with tab1:
         
     st.write("This model can accurately predict if a data point is an attack or benign with an accuracy of ", round(knn_model.score(X_test, y_test)*100, 3), "%. This means that the model can correctly classify ", confusion_matrix(y_test, y_pred)[0][0] + confusion_matrix(y_test, y_pred)[1][1] , " out of ", len(X_test), " test data points.")
 
-    st.write("While this model is very good it could be improved to reducde the number of false negatives (There is an attack happening but we think it is benign). This is the worst case scenario as it means that an attack could continue to happen without being detected.")
+    st.write("While this model is very good it could be improved to reduce the number of false negatives (There is an attack happening but we think it is benign). This is the worst-case scenario as it means that an attack could continue to happen without being detected.")
 
 with tab2:
     st.subheader("KNN Model details")
@@ -286,25 +333,28 @@ with tab2:
         st.write("The model use the following parameters: ", knn_model.get_params())
 
 
-st.write("While this model is very accurate it takes ", X.columns.shape[0], " features to achieve this accuracy. This is not ideal as it means that the model is very complex and would take awhile to run. If we want to predict attacks within a few seconds we need to reduce the number of features used.")
+st.write("While this model is very accurate it takes ", X.columns.shape[0], " features to achieve this accuracy. This is not ideal as it means that the model is very complex and could take a while to run. If we want to predict attacks within a few seconds we need to reduce the number of features used.")
 
 st.header("Reducing the number of features")
 
-st.write("In order to reduce the number of features we need we can use principal component analysis (PCA). PCA is a technique that reduces the number of features by combining them into a smaller number of features. This is done by finding the features that have the most variance and combining them into a new feature. This is done until the desired number of features is reached. This is a good way to reduce the number of features as it combines features that are similar and removes features that are not useful.")
+st.write("To reduce the number of features we need we can use principal component analysis (PCA). PCA is a technique that reduces the number of features by combining them into a smaller number of features. I am however going to just use the first part of PCA to find which features explain the most variance in the data and use those features to create a new model.")
 
 df_pca = df.select_dtypes(include=[np.number])
 
 nums = np.arange(df_pca.shape[1])
 
-var_ratio = []
-for num in nums:
-  pca = PCA(n_components=num)
-  pca.fit(df_pca)
-  var_ratio.append(np.sum(pca.explained_variance_ratio_))
+@st.cache_data
+def get_var_ratio(num):
+    var_ratio = []
+    for num in nums:
+        pca = PCA(n_components=num)
+        pca.fit(df_pca)
+        var_ratio.append(np.sum(pca.explained_variance_ratio_))
+    return var_ratio
 
 fix, ax = plt.subplots(figsize=(10,6))
 plt.grid()
-plt.plot(nums,var_ratio,marker='o')
+plt.plot(nums,get_var_ratio(nums),marker='o')
 plt.xlabel('n_components')
 plt.ylabel('Explained variance ratio')
 plt.title('n_components vs. Explained Variance Ratio')
@@ -320,7 +370,7 @@ df_pca_result.rename(index={0: "Percent of variance explained"}, inplace=True)
 col7, col8 = st.columns(2)
 with col7:
     st.write("From this PCA we can see which features explain the most variance in the data, here are the top 10:")
-    st.write("Nine of the top ten are are Inter-Arrival Time(IAT) features. This makes sense as during an attack an influx of packets would be sent to the target, which would cause the IAT to change drasticly.")
+    st.write("Nine of the top ten are Inter-Arrival Time(IAT) features. This makes sense as during an attack an influx of packets would be sent to the target, which would cause the IAT to change drastically.")
 with col8:
     st.table(df_pca_result.iloc[0].abs().sort_values(ascending=False).head(10))
 
@@ -329,10 +379,13 @@ with col8:
 
 st.header("Random Forest Model")
 
-st.write("Using the top 3 features from the PCA above we can create a random forest model that can predict almost as well but is less complex.")
+num_features = 3
+#num_features = st.slider('Number of features to use', 1, 23, 3)
 
-st.subheader("RF Model hyper parameters")
-st.write("View the results of my model then change the hyper parameters to see how it affects the model, see if you can improve the model!")
+st.write("Using the top", num_features, " features from the PCA above we can create a random forest model that can predict almost as well but is less complex.")
+
+st.subheader("RF Model hyperparameters")
+st.write("View the results of my model then change the hyperparameters to see how it affects the model, and see if you can improve the model!")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -347,7 +400,7 @@ with col2:
 
 
 
-X = df[df_pca_result.iloc[0].abs().sort_values(ascending=False).head(3).index]
+X = df[df_pca_result.iloc[0].abs().sort_values(ascending=False).head(num_features).index]
 y = df['Label.num']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
@@ -370,7 +423,7 @@ with tab3:
 
     st.table(df_confusion.set_index(' '))
 
-    st.write("This model can accurately predict if a data point is an attack or benign with an accuracy of ", round(rf_model.score(X_test, y_test)*100, 3), "%. This means that the model can correctly classify ", confusion_matrix(y_test, y_pred)[0][0] + confusion_matrix(y_test, y_pred)[1][1] , " out of ", len(X_test), " test data points. I did some hyper parameter tuning to decrease the number of false negatives (There is an attack happening but we think it is benign).")
+    st.write("This model can accurately predict if a data point is an attack or benign with an accuracy of ", round(rf_model.score(X_test, y_test)*100, 3), "%. This means that the model can correctly classify ", confusion_matrix(y_test, y_pred)[0][0] + confusion_matrix(y_test, y_pred)[1][1] , " out of ", len(X_test), " test data points. I did some hyperparameter tuning to decrease the number of false negatives (There is an attack happening but we think it is benign).")
     st.write("This model is much less complex than the previous model as it only uses the top ", X.columns.shape[0], " features from above which are: " + ', '.join(X.columns) + ".")
 
 with tab4:
@@ -382,14 +435,14 @@ with tab4:
 
 st.header("Final Thoughts")
 
-st.write("It is hard to find a balance between the number of features and the accuracy of the model, not to mention what model to use and what hyper parameters to use. Below is a graph of 5 different models using an increasing number of features, which were ranked in order of explained variation in the data from the PCA above.")
+st.write("It is hard to find a balance between the number of features and the accuracy of the model, not to mention what model to use and what hyperparameters to use. Below is a graph of 5 different models using an increasing number of features, which were ranked in order of explained variation in the data from the PCA above. All models were used with the default hyperparameters and a test size of 20%.")
 
 st.image('images/model_comparison.png')
 
-st.write("Using just 3 features random forest, k-nearist neighbors, and decision tree models can all achieve an accuracy of around 90%. This is very good as reducing the number of features allows these models to run faster and have the ability to decet attacks in real time.")
+st.write("Using just 3 features random forest, k-nearist neighbors, and decision tree models can all achieve an accuracy of around 90%. This is very good as reducing the number of features allows these models to run faster and can detect attacks in real-time.")
 st.write("And with only 23 features the random forest and decision tree models can achieve an accuracy better than my previous k-nearest neighbors model which used all the data.")
 
-st.write("With new and more powerful monitoring and analysis tools emerging, network traffic analysis is becoming more accessible and efficient. The ability to analyze network traffic data in real-time is crucial for detecting and preventing cyber attacks. By leveraging the power of machine learning, we can detect and prevent cyber attacks in real-time, thereby improving network security and reducing the risk of data breaches.")
+st.write("With new and more powerful monitoring and analysis tools emerging, network traffic analysis is becoming more accessible and efficient. The ability to analyze network traffic data in real-time is crucial for detecting and preventing cyber-attacks. By leveraging the power of machine learning, we can detect and prevent cyber attacks in real time, thereby improving network security and reducing the risk of data breaches.")
 
 
 # data
