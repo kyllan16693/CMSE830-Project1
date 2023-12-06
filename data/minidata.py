@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 #df = pd.read_csv('final_dataset.csv')
 
 
@@ -69,7 +70,40 @@ df.sample(n=200000).to_csv('clean_dataset.csv') """
 #Active Mean, Active Std, Active Max, Active Min, Idle Mean, Idle Std, Idle Max, Idle Min,
 #Fwd Seg Size Avg, Bwd Seg Size Avg, Fwd Blk Rate Avg, Bwd Blk Rate Avg, Fwd Seg Size Min,
 #Fwd Header Len, Bwd Header Len, Protocol, 
+#df = pd.read_csv('clean_dataset.csv')
+#df = df.drop(columns=['Active Mean', 'Active Std', 'Active Max', 'Active Min', 'Idle Mean', 'Idle Std', 'Idle Max', 'Idle Min', 'Fwd Seg Size Avg', 'Bwd Seg Size Avg', 'Fwd Blk Rate Avg', 'Bwd Blk Rate Avg', 'Fwd Seg Size Min', 'Fwd Header Len', 'Bwd Header Len', 'Protocol'])
+#df = df.dropna()
+#df.to_csv('clean_dataset.csv')
+
+
+#df = pd.read_csv('clean_dataset_old.csv')
+#df.drop(columns=['Unnamed: 0'], inplace=True)
+#df['Label.num'] = df['Label']
+#df['Label.str'] = df['Label'].replace({0: 'Benign', 1: 'Attack'})
+#df.drop(columns=['Label'], inplace=True)
+#df = df.replace([np.inf, -np.inf], np.nan)
+#df = df.dropna()
+
+#df.to_csv('clean_dataset.csv')
+
+
+#df = pd.read_csv('clean_dataset_v2.csv')
+#randomly select half of the data
+#df = df.sample(frac=1/2)
+#df.to_csv('clean_dataset_v3.csv')
+
+
 df = pd.read_csv('clean_dataset.csv')
-df = df.drop(columns=['Active Mean', 'Active Std', 'Active Max', 'Active Min', 'Idle Mean', 'Idle Std', 'Idle Max', 'Idle Min', 'Fwd Seg Size Avg', 'Bwd Seg Size Avg', 'Fwd Blk Rate Avg', 'Bwd Blk Rate Avg', 'Fwd Seg Size Min', 'Fwd Header Len', 'Bwd Header Len', 'Protocol'])
+#drop all unnamed columns
+df = df.loc[:, ~df.columns.str.contains('Unnamed')]
+#drop all columns with the word 'Flag' in them
+df = df.loc[:, ~df.columns.str.contains('Flag')]
+#rename 'Lable.str' to 'Label'
+df.rename(columns={'Label.str': 'Label'}, inplace=True)
+print(df.columns)
+print(len(df.columns))
+df = df.replace([np.inf, -np.inf], np.nan)
 df = df.dropna()
-df.to_csv('clean_dataset.csv')
+
+
+df.sample(n=100000).to_csv('clean_dataset_v2.csv')
