@@ -121,14 +121,19 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.write("Source Ports:")
-    st.write(df['Src Port'].value_counts())
+    @st.cache_data
+    def get_src_ports():
+        return df['Src Port'].value_counts().sort_values(ascending=False)
+    st.write(get_src_ports())
 with col2:
     st.write("Destination Ports:")
-    st.write(df['Dst Port'].value_counts())
+    @st.cache_data
+    def get_dst_ports():
+        return df['Dst Port'].value_counts().sort_values(ascending=False)
+    st.write(get_dst_ports())
 with col3:
     st.write("Total Ports:")
-    st.write((df['Dst Port'].value_counts() +
-             df['Src Port'].value_counts()).sort_values(ascending=False))
+    st.write((get_dst_ports() + get_src_ports()).sort_values(ascending=False))
 
 st.markdown("Port analysis is fundamental for network traffic examination. It provides insights into communication patterns and security risks.\n- **Port 80** is HTTP (Hypertext Transfer Protocol), the protocol for the web. It is the most commonly used port for web traffic.\n - **Port 443** is HTTPS (Hypertext Transfer Protocol Secure), the protocol for secure web traffic. It is meant to replace HTTP with a more secure connection.\n- **Port 53** is for mapping domain names to IP addresses (DNS). \n- **Port 3389** is Remote Desktop Protocol, the protocol for remote access to a computer.\n- **Port 445** is used by Microsoft Directory Services for Active Directory and the Server Message Block.")
 
@@ -376,11 +381,9 @@ with col8:
 
 
 #random forest model
-
 st.header("Random Forest Model")
 
-num_features = 3
-#num_features = st.slider('Number of features to use', 1, 23, 3)
+num_features = st.slider('Change the number of features to see how it affects the model:', 1, 10, 3)
 
 st.write("Using the top", num_features, " features from the PCA above we can create a random forest model that can predict almost as well but is less complex.")
 
@@ -397,7 +400,6 @@ with col2:
     test_size = st.slider('Percentage of data used for testing the model', 0.05, 0.5, 0.2)
     bootstrap = st.selectbox('Whether bootstrap samples are used when building trees', [True, False], index=1)
     n_jobs = st.slider('Number of jobs to run in parallel', 1, 100, 10)
-
 
 
 X = df[df_pca_result.iloc[0].abs().sort_values(ascending=False).head(num_features).index]
@@ -431,8 +433,7 @@ with tab4:
     st.write("The model was trained on ", len(X_train), " datapoints or ", round(len(X_train)/len(X)*100, 3), "% of the data and was tested on ", len(X_test), " datapoints or ", round(len(X_test)/len(X)*100, 3), "% of the data.")
     st.write("The model use the following parameters: ", rf_model.get_params())
 
-
-
+# Final Thoughts
 st.header("Final Thoughts")
 
 st.write("It is hard to find a balance between the number of features and the accuracy of the model, not to mention what model to use and what hyperparameters to use. Below is a graph of 5 different models using an increasing number of features, which were ranked in order of explained variation in the data from the PCA above. All models were used with the default hyperparameters and a test size of 20%.")
@@ -441,7 +442,6 @@ st.image('images/model_comparison.png')
 
 st.write("Using just 3 features random forest, k-nearist neighbors, and decision tree models can all achieve an accuracy of around 90%. This is very good as reducing the number of features allows these models to run faster and can detect attacks in real-time.")
 st.write("And with only 23 features the random forest and decision tree models can achieve an accuracy better than my previous k-nearest neighbors model which used all the data.")
-
 st.write("With new and more powerful monitoring and analysis tools emerging, network traffic analysis is becoming more accessible and efficient. The ability to analyze network traffic data in real-time is crucial for detecting and preventing cyber-attacks. By leveraging the power of machine learning, we can detect and prevent cyber attacks in real time, thereby improving network security and reducing the risk of data breaches.")
 
 
